@@ -3,5 +3,5 @@ use ExtUtils::MakeMaker;
 # the contents of the Makefile that is written.
 WriteMakefile(
     'NAME'	=> 'Tie::WarnGlobal',
-    'VERSION_FROM' => 'WarnGlobal/Scalar.pm', # finds $VERSION
+    'VERSION_FROM' => 'WarnGlobal.pm', # finds $VERSION
 );

@@ -2,7 +2,7 @@
 # `make test'. After `make install' it should work as `perl test.pl'
 
 use strict;
-use vars qw($READONLY_GLOBAL $DIE_ON_WRITE_GLOBAL $READWRITE_GLOBAL);
+use vars qw($READONLY_GLOBAL $DIE_ON_WRITE_GLOBAL $READWRITE_GLOBAL $WG_GLOBAL $WG_GLOBAL2);
 
 use Test;
 
@@ -13,7 +13,8 @@ sub warning_ok ( &@ );
 # Change 1..1 below to 1..last_test_to_print .
 # (It may become useful if the test is moved to ./t subdirectory.)
 
-BEGIN { $| = 1; plan tests => 12 }
+BEGIN { $| = 1; plan tests => 22 }
+use Tie::WarnGlobal '$WG_GLOBAL' => \&get_wg_global, '$WG_GLOBAL2' => [\&get_wg_global2, \&set_wg_global2];
 use Tie::WarnGlobal::Scalar;
 ok(1);
 
@@ -30,12 +31,11 @@ tie $READWRITE_GLOBAL, 'Tie::WarnGlobal::Scalar', { get => \&get_readwrite, set 
 warning_ok {
     my $foo = $READONLY_GLOBAL;
     ok($foo, 5);
-} "Global '\$READONLY_GLOBAL' was read-accessed at test.pl line 31.\n";
+} "Global '\$READONLY_GLOBAL' was read-accessed at test.pl line 32.\n";
 
 sub get_readonly {
     return 5;
 }
-
 
 warning_ok {
     $READONLY_GLOBAL = 37;
@@ -66,6 +66,40 @@ warning_ok {
     "A global was write-accessed at test.pl line 62.\n",
     "A global was read-accessed at test.pl line 63.\n";
 
+warning_ok {
+    my $foo = $WG_GLOBAL;
+    ok($foo, 'Sqweenookle!');
+} "Global '\$WG_GLOBAL' was read-accessed at test.pl line 70.\n";
+
+warning_ok {
+    eval {	
+	my $dh = tied $DIE_ON_WRITE_GLOBAL;
+	$dh->die_on_write(0);
+	$DIE_ON_WRITE_GLOBAL = 99;
+    };
+    ok(length($@) == 0);
+} "A global was write-accessed at test.pl line 78.\n";
+eval {
+    my $dh = tied $DIE_ON_WRITE_GLOBAL;
+    $dh->die_on_write(1);
+    $DIE_ON_WRITE_GLOBAL = "That's a mean bunny!";
+};
+ok($@, "Attempt to write-access a global(read-only) at test.pl line 85.\n");
+
+warning_ok {
+    my $bar = $WG_GLOBAL2;
+    ok($bar, 'Tom Servo');
+    $WG_GLOBAL2 = 'Crow';
+    my $bar2 = $WG_GLOBAL2;
+    ok($bar2, 'Crow');
+    
+} "Global '\$WG_GLOBAL2' was read-accessed at test.pl line 90.\n",
+    "Global '\$WG_GLOBAL2' was write-accessed at test.pl line 92.\n",
+    "Global '\$WG_GLOBAL2' was read-accessed at test.pl line 93.\n";
+   
+############################# Subroutines #########################
+
+
 sub warning_ok ( &@ ) {
     my ($test_sub, @warnings) = @_;
 
@@ -89,6 +123,24 @@ sub set_readwrite {
 }
 
 }
+
+sub get_wg_global {
+    return "Sqweenookle!";
+}
+
+BEGIN {
+    my $wg2_var = "Tom Servo";
+    
+sub get_wg_global2 {
+    return $wg2_var;
+}
+
+sub set_wg_global2 {
+    $wg2_var = $_[0];
+}
+
+}
+
 
 
 

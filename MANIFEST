@@ -1,6 +1,6 @@
 Changes
 MANIFEST
 Makefile.PL
-WarnGlobal.pod
+WarnGlobal.pm
 WarnGlobal/Scalar.pm
 test.pl

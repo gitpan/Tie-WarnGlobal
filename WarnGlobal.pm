@@ -1,8 +1,84 @@
+package Tie::WarnGlobal;
+
+use strict;
+use vars '$VERSION';
+
+use Carp;
+
+use Tie::WarnGlobal::Scalar;
+
+$VERSION = '0.03';
+
+sub import {
+    no strict 'refs';
+
+    my $type = shift;
+    my (@var_ties) = @_;
+    
+    my $tie_params = $type->_rearrange(\@var_ties);
+    
+    while ( my ($var_name, $options) =  each %$tie_params ) {
+	tie ${ $type->_fix_name($var_name) }, $type->_get_tie_type(), $options;
+    }
+
+    1;
+}
+
+sub _rearrange {
+    my $type = shift;
+    my ($var_ties_in) = @_;
+
+    my @var_ties = @$var_ties_in;
+    my %fixed_ties = ();
+
+    while ( scalar @var_ties ) {
+	my $var_name = shift @var_ties;
+	my $var_arg = shift @var_ties;
+	my %var_opts = ( name => $var_name );
+
+	if (ref $var_arg eq 'ARRAY') {
+	    $var_opts{'get'} = $var_arg->[0] if defined $var_arg->[0];
+	    $var_opts{'set'} = $var_arg->[1] if defined $var_arg->[1];
+	}
+	elsif (ref $var_arg eq 'CODE') {
+	    $var_opts{'get'} = $var_arg;
+	}
+	else {
+	    croak("${$type}::import() called improperly; stopped");
+	}
+	$fixed_ties{$var_name} = \%var_opts;
+    }
+
+    return \%fixed_ties;
+}
+
+sub _get_tie_type {
+    return 'Tie::WarnGlobal::Scalar';
+}
+
+sub _fix_name {
+    my $type = shift;
+    my ($var_name) = @_;
+
+    my $var = substr($var_name, 1);
+
+    $var_name =~ m{::} and return $var;
+
+    return ( caller(2) )[0] . '::' . $var;
+}
+
+1;
+
+__END__
+
 =head1 NAME
 
 Tie::WarnGlobal - Perl extension to aid in eliminating globals
 
 =head1 SYNOPSIS
+
+  use Tie::WarnGlobal $FOO => \&get_foo,
+                      $BAR => [\&get_bar, \&set_bar];
 
   use Tie::WarnGlobal::Scalar;
   tie $GLOBAL, 'Tie::WarnGlobal::Scalar', { get => \&get_global };
@@ -100,9 +176,22 @@ Tie::WarnGlobal::Scalar will die if an attempt is made to write to a
 value with no 'set' method defined. (Otherwise, the 'set' method will
 produce a warning, but will have no affect on the value.)
 
+As a convenience, you can tie variables in the 'use' line with Tie::WarnGlobal.
+
+
+=head1 TODO
+
+=over 4
+
+=item *
+Add support for tying arrays, hashes, and filehandles
+
+=item *
+Add variable-shadowing checks, so that we can monitor whether the tied variable and the subroutine stay in sync
+
 =head1 AUTHOR
 
-Stephen Nelson, stephen@artmachine.com
+Stephen Nelson, steven@jubal.com
 
 =head1 SEE ALSO
 
