@@ -1,8 +1,13 @@
 Revision history for Perl extension Tie::WarnGlobal.
 
-0.01  Sun May  6 07:14:49 2001
-	- original version; created by h2xs 1.19
+0.03  Mon May 7 18:31:00 2001
+        - Added convenience methods to Tie::WarnGlobal package
+        - Added die_on_write() method to Tie::WarnGlobal::Scalar
+        - Fixed e-mail address and other documentation issues
 
 0.02  Mon May 7 11:16:00 2001
         - Fixed problem with %FIELDS
+
+0.01  Sun May  6 07:14:49 2001
+	- original version; created by h2xs 1.19
 

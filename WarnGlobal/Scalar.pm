@@ -98,12 +98,16 @@ sub warn {
     my Tie::WarnGlobal::Scalar $self = shift;
     my ($warn_val) = @_;
 
+    defined $warn_val or return $self->{'warn'};
+
     $self->{'warn'} = $warn_val;
 }
 
 sub die_on_write {
     my Tie::WarnGlobal::Scalar $self = shift;
     my ($die_val) = @_;
+
+    defined $die_val or return $self->{'die_on_write'};
 
     $self->{'die_on_write'} = $die_val;
 }
@@ -151,7 +155,7 @@ accessed. These warnings are on by default; they are controlled by the
 warn() method on the tied object. If 'die_on_write' is set,
 Tie::WarnGlobal::Scalar will die if an attempt is made to write to a
 value with no 'set' method defined. (Otherwise, the 'set' method will
-produce a warning, but will have no affect on the value.)
+produce a warning, but will have no effect on the value.)
 
 =head1 AUTHOR
 
@@ -159,7 +163,7 @@ Stephen Nelson, steven@jubal.com
 
 =head1 SEE ALSO
 
-perl(1).
+perl(1), perltie(1), Tie::Watch(3), Tie::WarnGlobal(3).
 
 =cut
 

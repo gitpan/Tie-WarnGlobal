@@ -7,7 +7,7 @@ use Carp;
 
 use Tie::WarnGlobal::Scalar;
 
-$VERSION = '0.03';
+$VERSION = '0.04';
 
 sub import {
     no strict 'refs';
@@ -144,7 +144,8 @@ code. However, you have accomplished several good things:
 
 =over 4
 
-=item * A 'set_clown' call is easier to spot than a '$CLOWN = foo' statement.
+=item *
+A 'set_clown' call is easier to spot than a '$CLOWN = foo' statement.
 
 =item *
 You can put access controls into set_clown() to make sure that get_clown() will always
@@ -156,27 +157,26 @@ calls like $circus->get_clown(), making it easier to separate circus-related stu
 
 =back
 
-Globals are elusive things. If you inherit (or write) a program with
-all kinds of exported-by-default package variables, it can be hard to find them,
-and time-consuming to replace them all at once.
-
-Tie::WarnGlobal::Scalar is a partial answer. Once you've written a
-routine that returns the value that was originally in your global
-variable, you can tie that variable to the function, and the variable
+Globals can be elusive. It can be hard to find them, and
+time-consuming to replace them all at once. Tie::WarnGlobal::Scalar is
+designed to make the process easier. Once you've written your 'get'
+function, you can tie that variable to the function, and the variable
 will always return the value of the function. This can be valuable
 while testing, since it serves to verify that you've written your new
 'get'-function correctly.
 
-In order to trace down uses of the given global,
-Tie::WarnGlobal::Scalar can provide warnings whenever the global is
-accessed. These warnings are on by default; they are controlled by the
-'warn' parameter. Also, one can turn warnings on and off with the
-warn() method on the tied object. If 'die_on_write' is set,
-Tie::WarnGlobal::Scalar will die if an attempt is made to write to a
-value with no 'set' method defined. (Otherwise, the 'set' method will
-produce a warning, but will have no affect on the value.)
+In order to trace down uses of the given global, Tie::WarnGlobal can
+provide warnings whenever the global is accessed. These warnings are
+on by default; they are controlled by the 'warn' parameter. Also, one
+can turn warnings on and off with the warn() method on the tied
+object. If 'die_on_write' is set, Tie::WarnGlobal will die if an
+attempt is made to write to a value with no 'set' method
+defined. (Otherwise, the 'set' method will produce a warning, but will
+have no affect on the value.)
 
-As a convenience, you can tie variables in the 'use' line with Tie::WarnGlobal.
+As a convenience, you can tie variables in the 'use' line with
+Tie::WarnGlobal. Or, you can use the underlying
+Tie::WarnGlobal::Scalar module directly.
 
 
 =head1 TODO
@@ -184,10 +184,10 @@ As a convenience, you can tie variables in the 'use' line with Tie::WarnGlobal.
 =over 4
 
 =item *
-Add support for tying arrays, hashes, and filehandles
+Support for tying arrays, hashes, and filehandles
 
 =item *
-Add variable-shadowing checks, so that we can monitor whether the tied variable and the subroutine stay in sync
+Variable-shadowing checks, so that we can monitor whether the tied variable and the subroutine stay in sync
 
 =head1 AUTHOR
 
@@ -195,7 +195,7 @@ Stephen Nelson, steven@jubal.com
 
 =head1 SEE ALSO
 
-perl(1), Tie::Watch(3), Memoize(3).
+perl(1), perltie(1), Tie::Watch(3).
 
 =cut
 
